@@ -1,5 +1,5 @@
 # ExternalPoints
-Script for awarding points to users for visiting public pages.
+Script for awarding points to users for visiting public pages. It is plain old Javascript so it should run on any page you want to load the script in.
 
 See documentation in the developer portal for more info.
 

@@ -10,37 +10,62 @@
     4. alwaysdebug
     5. instance
 */
+const portalId = 83; //{portalid};
+const contentIdentifier = 'external-points'; //location.pathname;
+const region = 'us';
+const alwaysDebug = false;
+const instance = 'stage';
+const apiKey = ''; 
 
-var isDebug = isInDebug();
+var baseUrl = '';
+
+if (instance === 'stage') {
+    baseUrl = 'https://apistage.skidata' + region + '.com'
+} else {
+    baseUrl = 'https://api.skidata' + region + '.com'
+}
+
+var isDebug = isInDebug(alwaysDebug);
 
 if (isDebug) {
     console.log("SKIDATA Loyalty external points script loaded.");
 }
 
 var http = new XMLHttpRequest();
-var url = 'https://apistage.skidataus.com/point/83/v1/externalpoints/getmatchingcontent?contentkey=' + location.pathname;
-
-console.log(url);
+var url = baseUrl + '/point/' + portalId + '/v1/externalpointactivity/getmatchingcontent?contentkey=' + contentIdentifier;
 
 http.open('GET', url, true);
 http.withCredentials = true;
-http.setRequestHeader('x-api-key', ''); // TODO: what to do about APIKey? global? Need one for reach region
-var pa = http.send();
-var asd = pa.first()
-setTimeout(award, asd.timeToAward);
+http.setRequestHeader('x-api-key', apiKey);
+var externalPointActivities = http.send();
+var externalPointActivity = externalPointActivities[0];
+
+if (isDebug) {
+    console.log("Made request to getmatchingcontent resulting matching External Point Activity:", externalPointActivity);
+}
+
+if (externalPointActivity) {
+    setTimeout(award, externalPointActivity.timeToAward);
+}
 
 function award() {
     var http = new XMLHttpRequest();
-    var url = 'api.skidataus.com/56/v1/externalpoints';
+    var url = 'api.skidataus.com/56/v1/externalpointactivity';
     var params = 'contentkey=' + document.title;
     http.open('POST', url, true);
     http.withCredentials = true;
-    http.setRequestHeader('x-api-key', '');
+    http.setRequestHeader('x-api-key', apikey);
     http.send(params);
 }
 
-function isInDebug() {
+function isInDebug(alwaysDebug) {
     if (alwaysDebug) {
         return true;
     }
+
+    if (window.location.search.includes('lrsdebug=true')) {
+        return true;
+    }
+
+    return false;
 }
