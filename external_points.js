@@ -11,18 +11,18 @@
     5. instance
 */
 const portalId = 83; //{portalid};
-const contentIdentifier = 'external-points'; //location.pathname;
+const contentIdentifier = location.pathname;
 const region = 'us';
 const alwaysDebug = false;
 const instance = 'stage';
-const apiKey = ''; 
+const apiKey = '';
 
 var baseUrl = '';
 
 if (instance === 'stage') {
-    baseUrl = 'https://apistage.skidata' + region + '.com'
+    baseUrl = 'https://apistage.skidata' + region + '.com';
 } else {
-    baseUrl = 'https://api.skidata' + region + '.com'
+    baseUrl = 'https://api.skidata' + region + '.com';
 }
 
 var isDebug = isInDebug(alwaysDebug);
@@ -31,31 +31,54 @@ if (isDebug) {
     console.log("SKIDATA Loyalty external points script loaded.");
 }
 
-var http = new XMLHttpRequest();
-var url = baseUrl + '/point/' + portalId + '/v1/externalpointactivity/getmatchingcontent?contentkey=' + contentIdentifier;
+var request = new XMLHttpRequest();
+var url = baseUrl + '/point/' + portalId + '/v1/externalpointactivity/getmatchingcontent?contentIdentifier=' + contentIdentifier;
+request.onreadystatechange = function () {
+    if (this.readyState == XMLHttpRequest.DONE) {
+        matchingContentRequestReturned(this.responseText);
+    }
+};
+request.open('GET', url, true);
+request.withCredentials = true;
+request.setRequestHeader('x-api-key', apiKey);
+request.send();
 
-http.open('GET', url, true);
-http.withCredentials = true;
-http.setRequestHeader('x-api-key', apiKey);
-var externalPointActivities = http.send();
-var externalPointActivity = externalPointActivities[0];
+function matchingContentRequestReturned(txtExternalPointActivities) {
+    var externalPointActivities = JSON.parse(txtExternalPointActivities);
+    var externalPointActivity = externalPointActivities[0];
 
-if (isDebug) {
-    console.log("Made request to getmatchingcontent resulting matching External Point Activity:", externalPointActivity);
-}
+    if (isDebug) {
+        console.log("Made request to getmatchingcontent resulting matching External Point Activity:", externalPointActivity);
+    }
 
-if (externalPointActivity) {
-    setTimeout(award, externalPointActivity.timeToAward);
+    if (externalPointActivity) {
+        setTimeout(award, (externalPointActivity.delaySeconds * 1000));
+    }
 }
 
 function award() {
-    var http = new XMLHttpRequest();
-    var url = 'api.skidataus.com/56/v1/externalpointactivity';
-    var params = 'contentkey=' + document.title;
-    http.open('POST', url, true);
-    http.withCredentials = true;
-    http.setRequestHeader('x-api-key', apikey);
-    http.send(params);
+    console.log('award!');
+    var request = new XMLHttpRequest();
+    var url = baseUrl + '/point/' + portalId + '/v1/externalpointactivity/award?contentIdentifier=' + contentIdentifier;
+    request.onreadystatechange = function () {
+        if (this.readyState == XMLHttpRequest.DONE) {
+            awardRequestReturned(this.responseText);
+        }
+    };
+    request.open('POST', url, true);
+    request.withCredentials = true;
+    request.setRequestHeader('x-api-key', apiKey);
+    request.send();
+}
+
+function awardRequestReturned(statusCode, text) {
+    if (isDebug) {
+        if (statusCode === 200) {
+            console.log('Made request to award endpoint resulting in success');
+        } else {
+            console.log('Made request to award endpoint resulting in failure:', text);
+        }
+    }
 }
 
 function isInDebug(alwaysDebug) {
