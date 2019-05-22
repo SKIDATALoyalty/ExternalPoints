@@ -1,21 +1,32 @@
 /*
-    SKIDATA Loyalty - external points awarding script
-
-    parameters in {} will be replaced for the caller
-
-    parameters are:
-    1. portalid
-    2. contentidentifier
-    3. region
-    4. alwaysdebug
-    5. instance
+    SKIDATA Loyalty - External points awarding script
 */
-const portalId = 83; //{portalid};
-const contentIdentifier = location.pathname;
-const region = 'us';
-const alwaysDebug = false;
-const instance = 'stage';
-const apiKey = '';
+
+const scriptElement = document.getElementById('skidata-loyalty-external-points-script-tag');
+
+const portalId = scriptElement.getAttribute('portalid');
+const contentIdentifier = scriptElement.getAttribute('content-identifier');
+const region = scriptElement.getAttribute('region');
+var alwaysDebug = false;
+var instance = 'live';
+
+var alwaysDebugAttr = scriptElement.getAttribute('always-debug');
+if (alwaysDebugAttr) {
+    alwaysDebug = alwaysDebugAttr;
+}
+
+var instanceAttr = scriptElement.getAttribute('instance');
+if (instanceAttr) {
+    instance = instanceAttr;
+}
+
+var apiKey = '';
+
+switch (region) {
+    case 'us':
+        apiKey = 'CQfmTJZWD0mVmtElXR4euKEgdv8jAI675OqN8/kt/TA=';
+        break;
+}
 
 var baseUrl = '';
 
@@ -28,7 +39,7 @@ if (instance === 'stage') {
 var isDebug = isInDebug(alwaysDebug);
 
 if (isDebug) {
-    console.log("SKIDATA Loyalty: External points script loaded.");
+    console.log('SKIDATA Loyalty: External points script loaded. PortalId: ' + portalId + ' content-identifier: ' + contentIdentifier + ' region: ' + region);
 }
 
 var request = new XMLHttpRequest();
@@ -48,7 +59,11 @@ function matchingContentRequestReturned(txtExternalPointActivities) {
     var externalPointActivity = externalPointActivities[0];
 
     if (isDebug) {
-        console.log("SKIDATA Loyalty: Made request to getmatchingcontent resulting matching External Point Activity:", externalPointActivity);
+        if (externalPointActivity) {
+            console.log('SKIDATA Loyalty: Made successful request to getmatchingcontent resulting matching External Point Activity:', externalPointActivity);
+        } else {
+            console.log('SKIDATA Loyalty: Unable to find matching External Point Activity');
+        }
     }
 
     if (externalPointActivity) {
@@ -57,12 +72,11 @@ function matchingContentRequestReturned(txtExternalPointActivities) {
 }
 
 function award() {
-    console.log('award!');
     var request = new XMLHttpRequest();
     var url = baseUrl + '/point/' + portalId + '/v1/externalpointactivity/award?contentIdentifier=' + contentIdentifier;
     request.onreadystatechange = function () {
         if (this.readyState == XMLHttpRequest.DONE) {
-            awardRequestReturned(this.responseText);
+            awardRequestReturned(this.status, this.responseText);
         }
     };
     request.open('POST', url, true);
@@ -74,9 +88,9 @@ function award() {
 function awardRequestReturned(statusCode, text) {
     if (isDebug) {
         if (statusCode === 200) {
-            console.log('SKIDATA Loyalty: Made request to award endpoint resulting in success');
+            console.log('SKIDATA Loyalty: Made request to award endpoint resulting in success', JSON.parse(text));
         } else {
-            console.log('SKIDATA Loyalty: Made request to award endpoint resulting in failure:', text);
+            console.log('SKIDATA Loyalty: Made request to award endpoint resulting in failure:', JSON.parse(text));
         }
     }
 }
