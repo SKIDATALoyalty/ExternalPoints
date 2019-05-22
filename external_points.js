@@ -28,7 +28,7 @@ if (instance === 'stage') {
 var isDebug = isInDebug(alwaysDebug);
 
 if (isDebug) {
-    console.log("SKIDATA Loyalty external points script loaded.");
+    console.log("SKIDATA Loyalty: External points script loaded.");
 }
 
 var request = new XMLHttpRequest();
@@ -48,7 +48,7 @@ function matchingContentRequestReturned(txtExternalPointActivities) {
     var externalPointActivity = externalPointActivities[0];
 
     if (isDebug) {
-        console.log("Made request to getmatchingcontent resulting matching External Point Activity:", externalPointActivity);
+        console.log("SKIDATA Loyalty: Made request to getmatchingcontent resulting matching External Point Activity:", externalPointActivity);
     }
 
     if (externalPointActivity) {
@@ -74,9 +74,9 @@ function award() {
 function awardRequestReturned(statusCode, text) {
     if (isDebug) {
         if (statusCode === 200) {
-            console.log('Made request to award endpoint resulting in success');
+            console.log('SKIDATA Loyalty: Made request to award endpoint resulting in success');
         } else {
-            console.log('Made request to award endpoint resulting in failure:', text);
+            console.log('SKIDATA Loyalty: Made request to award endpoint resulting in failure:', text);
         }
     }
 }
