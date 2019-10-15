@@ -100,7 +100,7 @@ function isInDebug(alwaysDebug) {
         return true;
     }
 
-    if (window.location.search.includes('lrsdebug=true')) {
+    if (window.location.search.indexOf('lrsdebug=true') !== -1) {
         return true;
     }
 
